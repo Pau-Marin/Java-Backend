@@ -2,7 +2,9 @@ package com.paumarin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -41,7 +43,22 @@ public class Main {
         customerRepository.deleteById(id);
     }
 
+    @PutMapping("{customerId}")
+    public void updateCustomer(@PathVariable("customerId") Integer id, @RequestBody UpdateCustomerRequest request) {
+        if (customerRepository.existsById(id)) {
+            Customer customer = customerRepository.findById(id).get();
+            if (request.name() != null) customer.setName(request.name());
+            if (request.email() != null) customer.setEmail(request.email());
+            if (request.age() != null) customer.setAge(request.age());
+            customerRepository.save(customer);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+    }
+
     record NewCustomerRequest(String name, String email, Integer age) {
     }
 
+    record UpdateCustomerRequest(String name, String email, Integer age) {
+    }
 }
